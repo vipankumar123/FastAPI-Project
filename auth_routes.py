@@ -59,3 +59,43 @@ async def signup(user:SignupModel):
     Session.commit()
 
     return new_user
+
+
+#login route
+
+@auth_router.post('/login')
+async def login(user:LoginModel, Authorize:AuthJWT=Depends()):
+    """
+        This router is used for login a user
+    """
+    db_user = Session.query(User).filter(User.username==user.username).first()
+    if db_user and check_password_hash(db_user.password, user.password):
+        access_token = Authorize.create_access_token(subject=db_user.username)
+        refresh_token = Authorize.create_refresh_token(subject=db_user.username)
+    
+        response={
+            "access": access_token,
+            "refresh": refresh_token
+        }
+
+        return jsonable_encoder(response)
+
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+        detail="invalid username and password!") 
+
+#refresh token
+
+@auth_router.get('/refresh')
+async def refresh_token(Authorize:AuthJWT=Depends()):
+    try:
+        Authorize.jwt_refresh_token_required()
+    except exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="please provide a valid refresh token!")
+    
+    current_user = Authorize.get_jwt_subject()
+
+    access_token = Authorize.create_access_token(subject=current_user)
+
+    return jsonable_encoder({"access": access_token})
+
