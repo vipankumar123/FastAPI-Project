@@ -61,3 +61,42 @@ async def place_an_order(order:OrderModel, Authorize:AuthJWT=Depends()):
     }
 
     return jsonable_encoder(response)
+
+
+@order_router.get('/allorders')
+async def list_all_orders(Authorize:AuthJWT=Depends()):
+    try:
+        Authorize.jwt_required()
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid token")
+    
+    current_user = Authorize.get_jwt_subject()
+
+    user = Session.query(User).filter(User.username==current_user).first()
+
+    if user.is_staff:
+        orders = Session.query(Order).all()
+
+        return jsonable_encoder(orders)
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not a superuser")
+
+
+@order_router.get('/orders/{id}')
+async def get_order_by_id(id:int, Authorize:AuthJWT=Depends()):
+    try:
+        Authorize.jwt_required()
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid token")
+    
+    user = Authorize.get_jwt_subject()
+
+    current_user = Session.query(User).filter(User.username==user).first()
+
+    if current_user.is_staff:
+        order=Session.query(Order).filter(Order.id==id).first()
+
+        return jsonable_encoder(order)
+    
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not allowed to carry out request!")
+
+
