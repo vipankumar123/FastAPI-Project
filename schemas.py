@@ -17,7 +17,7 @@ class SignupModel(BaseModel):
                 "username":"vipan123",
                 "email":"vipan@gmail.com",
                 "password":"vipan",
-                "is_staff":False,
+                "is_staff":False, # True only staff members
                 "is_active":True
             }
         }

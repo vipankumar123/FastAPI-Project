@@ -14,7 +14,7 @@ from fastapi.exceptions import HTTPException
 
 auth_router = APIRouter(
     prefix='/auth',
-    tags=['Auth']
+    tags=['Authentication']
 )
 
 Session = session(bind=engine)

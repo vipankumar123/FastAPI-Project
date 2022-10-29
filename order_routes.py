@@ -100,3 +100,37 @@ async def get_order_by_id(id:int, Authorize:AuthJWT=Depends()):
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not allowed to carry out request!")
 
 
+@order_router.get('/user/order')
+async def get_user_orders(Authorize:AuthJWT=Depends()):
+    try:
+        Authorize.jwt_required()
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid token")
+    
+    user = Authorize.get_jwt_subject()
+
+    current_user = Session.query(User).filter(User.username==user).first()
+
+    return jsonable_encoder(current_user.orders)
+
+
+@order_router.get('/user/order/{id}', response_model=OrderModel)
+async def get_specific_order_by_id(id:int, Authorize:AuthJWT=Depends()):
+    try:
+        Authorize.jwt_required()
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid token")
+    
+    user = Authorize.get_jwt_subject()
+
+    current_user = Session.query(User).filter(User.username==user).first()
+
+    orders = current_user.orders
+
+    for o in orders:
+        if o.id==id:
+            return o
+        
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No order with such id!")
+
+
