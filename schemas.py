@@ -43,7 +43,6 @@ class OrderModel(BaseModel):
             "example":{
                 "quantity":2,
                 "order_status":"LARGE",
-
             }
         }
 

@@ -134,3 +134,23 @@ async def get_specific_order_by_id(id:int, Authorize:AuthJWT=Depends()):
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No order with such id!")
 
 
+@order_router.put('/order/update/{id}', response_model=OrderModel)
+async def update_order_by_id(id:int,order:OrderModel, Authorize:AuthJWT=Depends()):
+    try:
+        Authorize.jwt_required()
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid token")
+    
+    user = Authorize.get_jwt_subject()
+
+    order_to_update = Session.query(User).filter(Order.id==id).first()
+
+    order_to_update.quantity=order.quantity
+    order_to_update.pizza_size=order.pizza_size
+
+    Session.add(order_to_update)
+
+    Session.commit()
+
+    return jsonable_encoder(order_to_update)
+

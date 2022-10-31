@@ -13,7 +13,7 @@ from fastapi.exceptions import HTTPException
 
 
 auth_router = APIRouter(
-    prefix='/auth',
+    prefix='/authentication',
     tags=['Authentication']
 )
 
